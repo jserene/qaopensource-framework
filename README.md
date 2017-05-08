@@ -37,6 +37,14 @@ Example of binary use when testing against localhost:
 Note: While using a forced local connection with Browserstack. Test times are extremely slow
 since tests will be using your machines connection speeds through a vpn tunnel.
 
+# Configuration
+
+For setting up configuration dependencies. Please refer to example [configurations](https://github.com/Capt-Slow/qaopensource-framework-example-lib).
+
+# Projects and Tests
+
+Please visit [setting up your first project](https://github.com/Capt-Slow/qaopensource-framework-example-tests).
+
 #### Running:
 
 ##### Browser Tests:
@@ -162,120 +170,6 @@ $ python suite_runner.py --list=suites
 $ python suite_runner.py --list=tests
 ```
 
-#### Directory Structure:
-
-**Tests**
-
-```
-tests/project_1/
-               /api/
-               /browser/
-               /mobile/ <--- Test Type
-                      /template_1/
-                                 /test_suite_1/
-                                              /tests_for_suite_1
-
-```
-New projects, templates, test suites will automatically be detected.
-
-**Environment Configs**
-
-```
-lib/config/environments/
-                       /dev/
-                       /prod/
-                       /qa/
-                       /stage/
-                             /example_template.json
-```
-
-example_template.json:
-```json
-{
-	"example_stage": {
-		"url": {
-			"base_url": "https://example.com"
-		},
-		"db_test_settings": {
-			"db_name": "example",
-			"db_hostname": "db.example.com",
-			"db_port": "3306",
-			"db_password": "my_password",
-			"db_user": "my_user"
-		}
-	}
-}
-```
-
-If using mongodb as a data source the template can look like the following:
-```json
-{
-	"example_dev": {
-		"url": {
-			"base_url": "http://example.com"
-		},
-		"db_test_settings": {
-			"db_name": "none",
-			"db_hostname": "host.com",
-			"db_port": "mongo_port",
-			"db_password": "none",
-			"db_user": "none"
-		}
-	}
-}
-```
-
-It is important to note, that the first key in the json file must correlate with
-the environment you wish to run against. `example_qa` `example_stage` etc.
-
-Also, in this case `example` must have a parent test template `../browser/example_template/..`.
-
-**Runner Configs**
-
-```
-lib/config/runners/
-                       /grid/
-                       /local/
-                       /browserstack/
-                             /chrome_55.json
-```
-Browserstack runner example chrome_55.json:
-
-```json
-{
-  "name": "chrome_55",
-  "runner": "browserstack",
-  "enabled": "true",
-  "os": "Windows",
-  "platform": 7,
-  "browser": "Chrome",
-  "version": 55,
-  "resolution": "1920x1080",
-  "video": "true"
-}
-```
-The suite runner will only list `enabled` browserstack capabilities.
-
-Browserstack capabilities list can be found [here](https://www.browserstack.com/list-of-browsers-and-platforms?product=automate)
-
-Local runner example chrome.json:
-```json
-{
-	"runner": "local",
-	"enabled": "true",
-	"browser": "chrome"
-}
-```
-
-Grid runner example chrome.json:
-```json
-{
-	"runner": "grid",
-	"enabled": "true",
-	"browser": "chrome"
-}
-```
-
 ##### Runner Options:
 
 `local` Will run tests using the browser on your machine.
@@ -296,31 +190,6 @@ enables multiple driver instances.
 
 `browserstack_mobile_droid` Tests will run through browserstack android emulator.
 
-
-
-#### Settings.ini
-
-```ini
-[grid]
-grid_ip = 192.168.2.133
-browser = firefox
-```
-
-These are Selenium Grid configurations.
-Enter the browser type and IP address of the selenium Hub machine here.
-
-
-```ini
-[sauce_api]
-username = saucelabs_username
-key = saucelabs_api_key
-
-[browserstack_api]
-username = browserstack_username
-key = browserstack_api_key
-```
-
-Credentials for external services.
 
 #### Reporting
 
