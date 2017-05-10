@@ -14,12 +14,22 @@ import ConfigParser
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
+fp = FilePath()
+
 THIS_DIR = os.path.join(__file__, os.pardir)
-TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, 'tests/'))
-LIB_PATH = os.path.abspath('lib')
-LIB_CONFIG_PATH = os.path.abspath('lib/config/settings.ini')
+LIB_PATH_DIR = os.path.abspath('lib')
+LIB_PATH = os.path.abspath('lib'.format(fp.get_filepaths(LIB_PATH_DIR)[3].split('/')[5]))
+TEST_PATH_DIR = os.path.abspath(os.path.join(THIS_DIR, 'tests/'))
+repo_dir = fp.get_filepaths(TEST_PATH_DIR)[2].split('/')[5]
+repo_lib = fp.get_filepaths(LIB_PATH_DIR)[4].split('/')[5]
+TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, 'tests/{repo_dir}'
+                                         .format(repo_dir=fp.get_filepaths(TEST_PATH_DIR)[2].split('/')[5])))
+LIB_CONFIG_PATH = os.path.abspath(os.path.join(THIS_DIR, 'lib/{repo_lib}/config/settings.ini'.format(repo_lib=repo_lib)))
+# print LIB_CONFIG_PATH
 
 runner_aggregator = RunnerAggregator()
+
+# for the time being this will return test repo directory
 
 
 # Traverse Test directory and print out
@@ -76,7 +86,6 @@ report_db = args_dict['report_db']
 browser_opts = args_dict['browser']
 
 # This prints out available running options in the console
-fp = FilePath()
 if show_files == 'all':
     print list_files(TEST_PATH)
 if show_files == 'projects':
@@ -109,7 +118,7 @@ ctime = time.strftime('%s')
 # Create a .json file after running tests
 # and dump user arg test environment and runner
 def export_runner_opts():
-    test_opts = {'test_env': test_env, 'test_runner': runner}
+    test_opts = {'test_env': test_env, 'test_runner': runner, 'test_repo': repo_dir, 'lib_repo': repo_lib}
     with open('runner_opts.json', 'w+') as outfile:
         json.dump(test_opts, outfile)
 
@@ -154,10 +163,14 @@ def build_browser_test_suite_config(test_structure):
             pass
         elif iter_trimmed_path[3] == 'mobile':
             pass
+        elif iter_trimmed_path[3] == 'README.md':
+            pass
+        elif iter_trimmed_path[3] == '.git':
+            pass
         else:
-            browser_env.append(iter_trimmed_path[4])
+            browser_env.append(iter_trimmed_path[5])
             try:
-                browser_suite.append(iter_trimmed_path[5])
+                browser_suite.append(iter_trimmed_path[6])
             except IndexError:
                 pass
     project_name = list(set(project_name))
@@ -347,19 +360,19 @@ def compile_command(proj, env, test_type, runner):
     template_name = []
     set_get_suites = set(get_suites(test_suite))
 
-    single_cmd = "py.test tests/{project}/{test_type}/{template_title}/{test_suite}/{test_name} " \
+    single_cmd = "py.test tests/{repo_dir}/{project}/{test_type}/{template_title}/{test_suite}/{test_name} " \
                  "--env {template_nm}_{test_env} --runner {test_runner} " \
                  "--json-filename=reports/{datetime}_{template_nm}_{test_env}_report.json " \
                  "--mongodb_report={mongo_bool} {jreport}"
 
-    cmd = "py.test tests/{project}/{test_type}/{template_title}/{test_suite}/ " \
+    cmd = "py.test tests/{repo_dir}/{project}/{test_type}/{template_title}/{test_suite}/ " \
           "--env {template_nm}_{test_env} --runner {test_runner} " \
           "--json-filename=reports/{datetime}_{template_nm}_{test_env}_report.json " \
           "--mongodb_report={mongo_bool} {jreport}"
 
-    api_cmd = "py.test tests/{project}/{test_type}/{test_suite}/"
+    api_cmd = "py.test tests/{repo_dir}/{project}/{test_type}/{test_suite}/"
     # single api test command not implemented yet
-    single_api_cmd = "py.test tests/{project}/{test_type}/{test_suite}/{test_name}"
+    single_api_cmd = "py.test tests/{repo_dir}/{project}/{test_type}/{test_suite}/{test_name}"
 
     if test_type == 'browser' or test_type == 'mobile':
         if bool(single_test) is False:
@@ -367,7 +380,7 @@ def compile_command(proj, env, test_type, runner):
                 template_name.append(template_title)
                 for test_suite_name in set_get_suites:
                     if report_db == 'mongodb':
-                        proc_list.append(cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                     template_title=template_title, test_suite=test_suite_name,
                                                     test_env=env, test_runner=runner,
                                                     template_nm=template_title.replace('_template', ''),
@@ -379,13 +392,13 @@ def compile_command(proj, env, test_type, runner):
                                     template_nm=template_title.replace('_template', ''),
                                     datetime=ctime, test_suite=test_suite_name)
 
-                        proc_list.append(cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                     template_title=template_title, test_suite=test_suite_name,
                                                     test_env=env, test_runner=runner,
                                                     template_nm=template_title.replace('_template', ''),
                                                     datetime=ctime, mongo_bool='', jreport=jreport))
                     else:
-                        proc_list.append(cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                     template_title=template_title, test_suite=test_suite_name,
                                                     test_env=env, test_runner=runner,
                                                     template_nm=template_title.replace('_template', ''),
@@ -395,7 +408,7 @@ def compile_command(proj, env, test_type, runner):
                 template_name.append(template_title)
                 for test_suite_name in set_get_suites:
                     if report_db == 'mongodb':
-                        proc_list.append(single_cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(single_cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                            template_title=template_title, test_suite=test_suite_name,
                                                            test_env=env, test_runner=runner,
                                                            template_nm=template_title.replace('_template', ''),
@@ -407,14 +420,14 @@ def compile_command(proj, env, test_type, runner):
                                     template_nm=template_title.replace('_template', ''),
                                     datetime=ctime, test_suite=test_suite_name)
 
-                        proc_list.append(single_cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(single_cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                            template_title=template_title, test_suite=test_suite_name,
                                                            test_env=env, test_runner=runner,
                                                            template_nm=template_title.replace('_template', ''),
                                                            datetime=ctime, test_name=single_test,
                                                            mongo_bool='', jreport=jreport))
                     else:
-                        proc_list.append(single_cmd.format(project=proj, test_type=test_type,
+                        proc_list.append(single_cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                            template_title=template_title, test_suite=test_suite_name,
                                                            test_env=env, test_runner=runner,
                                                            template_nm=template_title.replace('_template', ''),
@@ -423,10 +436,10 @@ def compile_command(proj, env, test_type, runner):
     elif test_type == 'api':
         if bool(single_test) is False:
             for test_suite_name in set_get_suites:
-                proc_list.append(api_cmd.format(project=proj, test_type=test_type, test_suite=test_suite_name))
+                proc_list.append(api_cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type, test_suite=test_suite_name))
         elif bool(single_test) is True:
             for test_suite_name in set_get_suites:
-                proc_list.append(api_cmd.format(project=proj, test_type=test_type,
+                proc_list.append(api_cmd.format(repo_dir=repo_dir, project=proj, test_type=test_type,
                                                 test_suite=test_suite_name, test_name=single_test))
 
     return proc_list

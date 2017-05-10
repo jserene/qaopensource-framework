@@ -1,8 +1,24 @@
 import os
 import re
+import json
 
+# print test
 THIS_DIR = os.path.join(__file__, os.pardir)
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_PATH = os.path.abspath(os.path.join(ROOT_DIR, '../../'))
+
+def suite_runner_test_repo():
+    with open('{root_path}/runner_opts.json'.format(root_path=ROOT_PATH)) as data_file:
+        runner_data = json.load(data_file)
+        return runner_data['test_repo']
+
 TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests'))
+TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests/{test_repo}/'.format(test_repo=suite_runner_test_repo())))
+
+
+# print test
+# print TEST_PATH
+# print TEST_PATH2
 
 
 class FilePath(object):
@@ -152,3 +168,13 @@ class FilePath(object):
                     sgl_test.append(single_test_value)
 
         return sgl_test
+
+
+# fp = FilePath()
+# print fp.get_filepaths(TEST_PATH)[2].split('/')[5]
+# tt = []
+# for directories in fp.get_filepaths(TEST_PATH):
+#     # tt.append(directories.split('/'))
+#     print directories
+#
+# print tt

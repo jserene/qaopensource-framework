@@ -5,6 +5,7 @@ import json
 from test_suite_aggregator import TestSuiteAggregator
 from pymongo import MongoClient
 from bson import ObjectId
+from runner_aggregator import suite_runner_lib_repo
 
 
 THIS_DIR = os.path.join(__file__, os.pardir)
@@ -57,10 +58,11 @@ class DBEnv(object):
         with open('{project_root}/runner_opts.json'.format(project_root=ROOT_PATH)) as data_file:
             runner_data = json.load(data_file)
 
-        config_file = '{lib_path}/config/environments/{test_env}/{config}.json'\
+        config_file = '{lib_path}/{lib_repo}/config/environments/{test_env}/{config}.json'\
             .format(lib_path=LIB_PATH,
                     test_env=runner_data['test_env'],
-                    config=template_to_query[0])
+                    config=template_to_query[0],
+                    lib_repo=suite_runner_lib_repo())
 
         return config_file
 

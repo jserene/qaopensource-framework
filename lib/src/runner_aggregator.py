@@ -4,17 +4,32 @@ from filepath import FilePath
 import re
 
 THIS_DIR = os.path.join(__file__, os.pardir)
-LIB_PATH = os.path.abspath(os.path.join(THIS_DIR, os.pardir))
-TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests'))
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_PATH = os.path.abspath(os.path.join(ROOT_DIR, '../../'))
+
+
+def suite_runner_test_repo():
+    with open('{root_path}/runner_opts.json'.format(root_path=ROOT_PATH)) as data_file:
+        runner_data = json.load(data_file)
+        return runner_data['test_repo']
+
+
+def suite_runner_lib_repo():
+    with open('{root_path}/runner_opts.json'.format(root_path=ROOT_PATH)) as data_file:
+        runner_data = json.load(data_file)
+        return runner_data['lib_repo']
+
+LIB_PATH = os.path.abspath(os.path.join(THIS_DIR, os.pardir))
+TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests/{repo_dir}/'.format(repo_dir=suite_runner_test_repo())))
 
 
 class RunnerAggregator(object):
 
     def fetch_runner_configs(self):
         fp = FilePath()
-        get_structure = fp.get_filepaths('{lib_path}/config/runners'.format(lib_path=LIB_PATH))
+        get_structure = fp.get_filepaths('{lib_path}/{lib_repo}/config/runners'
+                                         .format(lib_path=LIB_PATH, lib_repo=suite_runner_lib_repo()))
 
         return get_structure
 

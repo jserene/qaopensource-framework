@@ -2,17 +2,20 @@ import os
 import json
 from filepath import FilePath
 import re
+from runner_aggregator import suite_runner_lib_repo
+from runner_aggregator import suite_runner_test_repo
 
 THIS_DIR = os.path.join(__file__, os.pardir)
 LIB_PATH = os.path.abspath(os.path.join(THIS_DIR, os.pardir))
-TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests'))
+TEST_PATH = os.path.abspath(os.path.join(THIS_DIR, '../../tests/{test_rep}/'.format(test_rep=suite_runner_test_repo())))
 
 
 class TestSuiteAggregator(object):
 
     def fetch_env_configs(self):
         fp = FilePath()
-        get_structure = fp.get_filepaths('{lib_path}/config/environments'.format(lib_path=LIB_PATH))
+        get_structure = fp.get_filepaths('{lib_path}/{lib_repo}/config/environments'.format(lib_path=LIB_PATH,
+                                                                                            lib_repo=suite_runner_lib_repo()))
 
         return get_structure
 
